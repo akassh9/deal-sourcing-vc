@@ -1,0 +1,35 @@
+# Node modules (for root, backend, and frontend)
+node_modules/
+**/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (do not commit sensitive credentials)
+.env
+.env.*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build output directories
+dist/
+build/
+
+# Vite cache and temporary files
+.vite/
+.vite-cache/
+
+# Google Cloud credentials (sensitive file, do not commit)
+pitch-1739020848146-925095e8b054.json
+
+# IDE / Editor directories (optional)
+.idea/
+.vscode/
+
+# Temporary files
+*.tmp
