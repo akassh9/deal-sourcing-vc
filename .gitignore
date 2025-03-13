@@ -33,3 +33,6 @@ pitch-1739020848146-925095e8b054.json
 
 # Temporary files
 *.tmp
+
+# Uploads directory
+uploads/
