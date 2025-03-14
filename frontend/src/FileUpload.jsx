@@ -27,7 +27,7 @@ function FileUpload() {
       });
 
       const data = await response.json();
-      console.log('Frontend received:', data);
+      console.log('Frontend received:', data); // Full response
       if (response.ok) {
         setUploadStatus('Upload successful!');
         const text =
@@ -35,7 +35,8 @@ function FileUpload() {
           'No text extracted.';
         setExtractedText(text);
         console.log('Extracted text set to:', text);
-        setUploadId(data.contentId);
+        setUploadId(data.uploadId); // Should be "Kecha Pitch Deck.pdf"
+        console.log('Upload ID set to:', data.uploadId); // Debug
       } else {
         setUploadStatus(`Error: ${data.error}`);
       }
@@ -45,9 +46,34 @@ function FileUpload() {
     }
   };
 
-  const handleSaveEditedContent = (editedContent) => {
-    console.log('Edited content:', editedContent);
-    setUploadStatus('Content saved (check console for now)!');
+  const handleSaveEditedContent = async (editedContent) => {
+    if (!uploadId) {
+      setUploadStatus('No upload ID available to save edits.');
+      console.log('No uploadId:', uploadId); // Debug
+      return;
+    }
+
+    console.log('Saving edits:', editedContent, 'for uploadId:', uploadId); // Debug
+    try {
+      const response = await fetch(`http://localhost:3001/content/${encodeURIComponent(uploadId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ editedContent }),
+      });
+
+      const data = await response.json();
+      console.log('PUT response:', data); // Debug
+      if (response.ok) {
+        console.log('Content saved to backend:', data);
+        setUploadStatus('Content saved successfully!');
+      } else {
+        console.error('Save error:', data);
+        setUploadStatus(`Error: ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Network error saving content:', err);
+      setUploadStatus('Failed to save content due to a network error.');
+    }
   };
 
   return (
