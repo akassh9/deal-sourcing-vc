@@ -9,6 +9,7 @@ import { uploadFile } from './storage.js';
 import { processPdfWithGemini } from './gemini.js';
 import { GoogleAuth } from 'google-auth-library';
 import Content from './models/Content.js';
+import { generateInvestmentMemo } from './groq.js';
 
 const auth = new GoogleAuth({
   keyFile: './pitch-1739020848146-925095e8b054.json',
@@ -63,7 +64,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     res.status(200).json({
       message: 'Upload and processing successful',
       contentId: content._id,
-      uploadId: content.uploadId, // Add this explicitly
+      uploadId: content.uploadId,
       extractedData: geminiResponse,
     });
   } catch (error) {
@@ -103,6 +104,32 @@ app.put('/content/:uploadId', async (req, res) => {
 
 app.get('/', (req, res) => {
   res.send('Backend is working!');
+});
+
+// NEW ENDPOINT: Generate memo
+app.post('/generate-memo/:uploadId', async (req, res) => {
+  try {
+    const content = await Content.findOne({ uploadId: req.params.uploadId });
+    if (!content) return res.status(404).json({ error: 'Content not found' });
+
+    const editedContent = content.editedContent || content.originalContent;
+    const { memo, reasoning } = await generateInvestmentMemo(editedContent);
+
+    // Update the content document
+    content.memo = memo;
+    content.reasoning = reasoning;
+    content.updatedAt = Date.now();
+    await content.save();
+
+    res.status(200).json({ 
+      message: 'Memo generated successfully', 
+      memo, 
+      reasoning 
+    });
+  } catch (error) {
+    console.error('❌ Error generating memo:', error);
+    res.status(500).json({ error: 'Failed to generate memo' });
+  }
 });
 
 async function startServer() {

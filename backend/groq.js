@@ -1,3 +1,11 @@
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
 export async function generateInvestmentMemo(content) {
   try {
     const response = await axios.post(
