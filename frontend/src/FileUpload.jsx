@@ -6,6 +6,11 @@ function FileUpload() {
   const [uploadStatus, setUploadStatus] = useState('');
   const [extractedText, setExtractedText] = useState('');
   const [uploadId, setUploadId] = useState('');
+  const [memo, setMemo] = useState('');
+  const [reasoning, setReasoning] = useState('');
+  const [memoStatus, setMemoStatus] = useState('');
+  const [showReasoning, setShowReasoning] = useState(false);
+  const [hasEdits, setHasEdits] = useState(false); // Track if edits were saved
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -27,16 +32,15 @@ function FileUpload() {
       });
 
       const data = await response.json();
-      console.log('Frontend received:', data); // Full response
+      console.log('Frontend received:', data);
       if (response.ok) {
         setUploadStatus('Upload successful!');
         const text =
           data.extractedData?.candidates?.[0]?.content?.parts?.[0]?.text ||
           'No text extracted.';
         setExtractedText(text);
-        console.log('Extracted text set to:', text);
-        setUploadId(data.uploadId); // Should be "Kecha Pitch Deck.pdf"
-        console.log('Upload ID set to:', data.uploadId); // Debug
+        setUploadId(data.uploadId);
+        console.log('Upload ID set to:', data.uploadId);
       } else {
         setUploadStatus(`Error: ${data.error}`);
       }
@@ -49,11 +53,11 @@ function FileUpload() {
   const handleSaveEditedContent = async (editedContent) => {
     if (!uploadId) {
       setUploadStatus('No upload ID available to save edits.');
-      console.log('No uploadId:', uploadId); // Debug
+      console.log('No uploadId:', uploadId);
       return;
     }
 
-    console.log('Saving edits:', editedContent, 'for uploadId:', uploadId); // Debug
+    console.log('Saving edits:', editedContent, 'for uploadId:', uploadId);
     try {
       const response = await fetch(`http://localhost:3001/content/${encodeURIComponent(uploadId)}`, {
         method: 'PUT',
@@ -62,10 +66,11 @@ function FileUpload() {
       });
 
       const data = await response.json();
-      console.log('PUT response:', data); // Debug
+      console.log('PUT response:', data);
       if (response.ok) {
         console.log('Content saved to backend:', data);
         setUploadStatus('Content saved successfully!');
+        setHasEdits(true); // Mark that edits exist
       } else {
         console.error('Save error:', data);
         setUploadStatus(`Error: ${data.error}`);
@@ -73,6 +78,34 @@ function FileUpload() {
     } catch (err) {
       console.error('Network error saving content:', err);
       setUploadStatus('Failed to save content due to a network error.');
+    }
+  };
+
+  const handleGenerateMemo = async () => {
+    if (!uploadId) {
+      setMemoStatus('No upload ID available to generate memo.');
+      console.log('No uploadId:', uploadId);
+      return;
+    }
+
+    setMemoStatus('Generating memo...');
+    try {
+      const response = await fetch(`http://localhost:3001/generate-memo/${encodeURIComponent(uploadId)}`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      console.log('Memo response:', data);
+      if (response.ok) {
+        setMemo(data.memo);
+        setReasoning(data.reasoning);
+        setMemoStatus(`Memo generated successfully${hasEdits ? ' from edited content' : ' from original content'}!`);
+      } else {
+        setMemoStatus(`Error: ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Network error generating memo:', err);
+      setMemoStatus('Failed to generate memo due to a network error.');
     }
   };
 
@@ -90,6 +123,28 @@ function FileUpload() {
             initialContent={extractedText}
             onSave={handleSaveEditedContent}
           />
+          <button onClick={handleGenerateMemo} style={{ marginTop: '10px' }}>
+            Generate Memo
+          </button>
+          <p>{memoStatus}</p>
+        </div>
+      )}
+
+      {memo && (
+        <div className="memo-container">
+          <h3>Generated Investment Memo</h3>
+          <div className="memo-content">
+            <pre>{memo}</pre>
+          </div>
+          <button onClick={() => setShowReasoning(!showReasoning)} style={{ marginTop: '10px' }}>
+            {showReasoning ? 'Hide Reasoning' : 'Show Reasoning'}
+          </button>
+          {showReasoning && (
+            <div className="reasoning-content">
+              <h4>Reasoning Steps</h4>
+              <pre>{reasoning}</pre>
+            </div>
+          )}
         </div>
       )}
     </div>

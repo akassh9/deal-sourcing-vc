@@ -61,3 +61,31 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+
+.memo-container {
+  margin: 20px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-width: 800px;
+  text-align: left;
+}
+
+.memo-content {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: #333; /* Dark gray for readability */
+}
+
+.reasoning-content {
+  margin-top: 10px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: #333; /* Match memo color */
+}
