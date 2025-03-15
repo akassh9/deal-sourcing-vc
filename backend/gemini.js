@@ -5,7 +5,7 @@ dotenv.config();
 
 const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID;
 const LOCATION = 'us-central1';
-const GEMINI_MODEL_URL = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/gemini-2.0-flash-001:generateContent`;
+const GEMINI_MODEL_URL = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/gemini-2.0-flash-lite-001:generateContent`;
 
 export async function processPdfWithGemini(gcsUri) {
   try {
