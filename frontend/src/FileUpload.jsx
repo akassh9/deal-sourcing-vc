@@ -48,7 +48,33 @@ function FileUpload() {
   };
 
   const handleSaveEditedContent = async (editedContent) => {
-    // ... (unchanged from your original)
+    if (!uploadId) {
+      setUploadStatus('No upload ID available to save edits.');
+      console.log('No uploadId:', uploadId);
+      return;
+    }
+
+    console.log('Saving edits:', editedContent, 'for uploadId:', uploadId);
+    try {
+      const response = await fetch(`http://localhost:3001/content/${encodeURIComponent(uploadId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ editedContent }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Content saved to backend:', data);
+        setUploadStatus('Content saved successfully!');
+        setHasEdits(true); // Mark that edits exist
+      } else {
+        console.error('Save error:', data);
+        setUploadStatus(`Error: ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Network error saving content:', err);
+      setUploadStatus('Failed to save content due to a network error.');
+    }
   };
 
   const handleGenerateMemo = async () => {
@@ -77,11 +103,17 @@ function FileUpload() {
     }
   };
 
+  const handleCopyMemo = () => {
+    navigator.clipboard.writeText(memo)
+      .then(() => setMemoStatus('Memo copied to clipboard!'))
+      .catch(() => setMemoStatus('Failed to copy memo.'));
+  };
+
   return (
     <div>
       <h2>Upload Pitch Deck</h2>
       <input type="file" onChange={handleFileChange} accept=".pdf,.ppt,.pptx" />
-      <button onClick={handleUpload}>Upload</button> {/* This should still be here */}
+      <button onClick={handleUpload}>Upload</button>
       <p>{uploadStatus}</p>
 
       {extractedText && (
@@ -105,9 +137,18 @@ function FileUpload() {
               <ReactMarkdown>{memo}</ReactMarkdown>
             </div>
           )}
-          <button onClick={() => setShowReasoning(!showReasoning)} style={{ marginTop: '10px' }}>
-            {showReasoning ? 'Hide Reasoning' : 'Show Reasoning'}
-          </button>
+          <div style={{ marginTop: '10px' }}>
+            <button
+              onClick={() => setShowReasoning(!showReasoning)}
+              className="toggle-reasoning"
+              style={{ marginRight: '10px' }}
+            >
+              {showReasoning ? 'Hide Reasoning' : 'Show Reasoning'}
+            </button>
+            <button onClick={handleCopyMemo}>
+              Copy Memo
+            </button>
+          </div>
           {showReasoning && (
             <div className="reasoning-content">
               <h4>Reasoning Steps</h4>
