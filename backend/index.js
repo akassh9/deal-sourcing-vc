@@ -10,6 +10,8 @@ import { processPdfWithGemini } from './gemini.js';
 import { GoogleAuth } from 'google-auth-library';
 import Content from './models/Content.js';
 import { generateInvestmentMemo } from './groq.js';
+import { validateMemoContent } from './validation.js';
+
 
 const auth = new GoogleAuth({
   keyFile: './pitch-1739020848146-925095e8b054.json',
@@ -131,7 +133,46 @@ app.post('/generate-memo/:uploadId', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate memo' });
   }
 });
-
+// POST /validate-memo-content: Validate selected memo content using Google CSE
+/**
+ * POST /validate-memo-content
+ * Purpose: Validate selected memo content by querying the Google Custom Search Engine (CSE).
+ * Request Body: { query: string } - The text to validate.
+ * Response: {
+ *   results: [
+ *     {
+ *       title: string,
+ *       snippet: string,
+ *       link: string
+ *     },
+ *     ...
+ *   ]
+ * }
+ * Error: Returns a 400 error if no query is provided or a 500 error if validation fails.
+ */
+app.post('/validate-memo-content', async (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query) {
+      return res.status(400).json({ error: 'Query text is required.' });
+    }
+    
+    const searchResults = await validateMemoContent(query);
+    
+    const formattedResults = searchResults.items
+      ? searchResults.items.map(item => ({
+          title: item.title,
+          snippet: item.snippet,
+          link: item.link,
+        }))
+      : [];
+    
+    res.status(200).json({ results: formattedResults });
+  } catch (error) {
+    console.error("Validation endpoint error:", error);
+    res.status(500).json({ error: 'Failed to validate memo content.' });
+  }
+});
 async function startServer() {
   await getAccessToken();
   app.listen(PORT, () => {

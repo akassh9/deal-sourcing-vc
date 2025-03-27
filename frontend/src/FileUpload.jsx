@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TextEditor from './TextEditor';
 import ReactMarkdown from 'react-markdown';
+import ValidationResults from './ValidationResults';
 
 function FileUpload() {
   const [file, setFile] = useState(null);
@@ -13,6 +14,10 @@ function FileUpload() {
   const [showReasoning, setShowReasoning] = useState(false);
   const [hasEdits, setHasEdits] = useState(false);
   const [isLoadingMemo, setIsLoadingMemo] = useState(false);
+  const [validationResults, setValidationResults] = useState(null);
+  const [validationLoading, setValidationLoading] = useState(false);
+  const [validationError, setValidationError] = useState('');
+
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -103,6 +108,42 @@ function FileUpload() {
     }
   };
 
+  const handleValidateSelectedText = async () => {
+    // Get the text currently selected by the user.
+    const selectedText = window.getSelection().toString();
+    if (!selectedText || selectedText.trim() === '') {
+      setMemoStatus('Please select some text in the memo to validate.');
+      return;
+    }
+    
+    setValidationLoading(true);
+    setValidationError('');
+    setMemoStatus('Validating selected text...');
+    
+    try {
+      const response = await fetch('http://localhost:3001/validate-memo-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: selectedText }),
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        setValidationResults(data.results);
+        setMemoStatus('Validation complete.');
+      } else {
+        setValidationError(data.error || 'Validation failed.');
+        setMemoStatus('');
+      }
+    } catch (err) {
+      console.error('Validation error:', err);
+      setValidationError('Failed to validate due to a network error.');
+      setMemoStatus('');
+    } finally {
+      setValidationLoading(false);
+    }
+  };
+
   const handleCopyMemo = () => {
     navigator.clipboard.writeText(memo)
       .then(() => setMemoStatus('Memo copied to clipboard!'))
@@ -137,16 +178,18 @@ function FileUpload() {
               <ReactMarkdown>{memo}</ReactMarkdown>
             </div>
           )}
-          <div style={{ marginTop: '10px' }}>
+          <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
             <button
               onClick={() => setShowReasoning(!showReasoning)}
               className="toggle-reasoning"
-              style={{ marginRight: '10px' }}
             >
               {showReasoning ? 'Hide Reasoning' : 'Show Reasoning'}
             </button>
             <button onClick={handleCopyMemo}>
               Copy Memo
+            </button>
+            <button onClick={handleValidateSelectedText}>
+              Validate Selected Text
             </button>
           </div>
           {showReasoning && (
