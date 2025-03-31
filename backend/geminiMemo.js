@@ -30,11 +30,17 @@ export async function generateInvestmentMemo(content) {
 
   try {
     const promptText = `You are an expert investor tasked with generating a concise investment memo.
-Structure the memo with the following sections: **Value Proposition**, **Market Opportunity**, **Financials**, and **Risks**.
+Structure the memo with the following sections:
+- **Value Proposition**
+- **Market Opportunity**
+- **Financials**
+- **Risks**
 Base your memo solely on the following content:
 ${content}
 
-When citing data (such as market size, competitor analysis, or factual discrepancies), you MUST use Google Search to verify the information and include appropriate citations in the format [1], [2], etc. List the sources corresponding to these numbers at the end under a **Sources** section. If you cannot verify a specific piece of data via search, state that clearly in the sources list.`;
+For any data points (e.g. market size, competitors, industry benchmarks, or factual claims), you MUST verify the information using Google Search. 
+Include citations in the format [1], [2], etc., and list corresponding sources at the end under a **Sources** section. 
+If a specific piece of information cannot be verified via search, clearly state this in the sources list. Avoid speculation without supporting evidence.`;
 
     const requestBody = {
       contents: [
@@ -50,7 +56,7 @@ When citing data (such as market size, competitor analysis, or factual discrepan
         }
       ],
       generationConfig: {
-        // temperature: 0.7,
+        temperature: 0.4
         // maxOutputTokens: 1024,
       },
     };
