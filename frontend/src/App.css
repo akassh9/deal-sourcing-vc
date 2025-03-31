@@ -82,29 +82,3 @@ button:hover {
   max-width: 100%;
   overflow-wrap: break-word;
 }
-
-.reasoning-content {
-  margin-top: 10px;
-  background-color: #f5f5f5;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  line-height: 1.6;
-  font-size: 16px;
-  color: #333;
-  max-width: 100%;
-  overflow-wrap: break-word;
-}
-
-/* Add this to target <pre> inside .reasoning-content */
-.reasoning-content pre {
-  white-space: pre-wrap; /* Wraps text while preserving spaces/newlines */
-  word-wrap: break-word; /* Breaks long words */
-  margin: 0; /* Remove default <pre> margins */
-  padding: 0; /* Remove default padding */
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-}
-
-button.toggle-reasoning:hover {
-  background-color: #0069d9;
-}
