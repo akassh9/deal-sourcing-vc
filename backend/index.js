@@ -100,6 +100,11 @@ app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
+// Add 0cred verification endpoint
+app.get('/0cred-verify', (req, res) => {
+  res.send('<a2c06f5c-c891-4ea8-b23e-1244555c748b>');
+});
+
 // POST /upload
 app.post('/upload', upload.single('file'), async (req, res) => {
   console.log('Received request on /upload');
